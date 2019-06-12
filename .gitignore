@@ -1,1 +1,6 @@
 *.csv
+settings.ini
+test_process.py
+.vscode
+fotos
+test_process.py
