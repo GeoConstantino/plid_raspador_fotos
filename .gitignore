@@ -4,3 +4,7 @@ test_process.py
 .vscode
 fotos
 test_process.py
+*.jpg
+*.pytest_*
+*process.cpython*
+*test_process.cpython*
