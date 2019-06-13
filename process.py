@@ -19,7 +19,6 @@ PATH = "out"
 
 
 def manda_consulta(rg, conn):
-    #conn = Client(URL_CONSULTA_RG)
     print('sending {}'.format(rg))
     conn.service.consultarRG(CNPJ,CHAVE,PERFIL,rg, rg.zfill(10),CPF)
 
