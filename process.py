@@ -1,3 +1,4 @@
+import argparse
 import base64
 import os
 
@@ -18,6 +19,17 @@ CPF = config('CPF')
 PATH = "out"
 
 
+### adicinar feature de passar apenas um rg
+### 
+
+def conectar_busca():
+    return (Client("http://10.200.96.170:8080/servico.asmx?wsdl"))
+
+
+def conectar_resultado():
+    return (Client("http://10.200.96.170:8181/servico.asmx?wsdl"))
+
+
 def manda_consulta(rg, conn):
     print('sending {}'.format(rg))
     conn.service.consultarRG(CNPJ,CHAVE,PERFIL,rg, rg.zfill(10),CPF)
@@ -32,21 +44,12 @@ def pega_resultado(rg, ress):
         return None
     return (res2)
 
-def conectar_busca():
-    return (Client("http://10.200.96.170:8080/servico.asmx?wsdl"))
-
-def conectar_resultado():
-    return (Client("http://10.200.96.170:8181/servico.asmx?wsdl"))
-
 
 def salva_foto(foto, rg):
     with open('{path}/{rg}.jpg'.format(rg=rg, path=PATH), 'wb') as fobj:
         fobj.write(base64.b64decode(str.encode(foto)))
     
-   #print('foto salva:' + rg)
-
-    
-
+ 
 def lista_rgs(file):
     df = pd.read_csv(file, encoding='latin1')
     df = df.loc[:,['VTMA_RG','SNCA_VTMA_DK']]
@@ -54,25 +57,49 @@ def lista_rgs(file):
 
     return df
 
+
 if __name__=="__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        '--rg',
+        help='Para pesquisar por foto de apenas um RG.'
+    )
+    parser.add_argument(
+        '--name',
+        help='Nome do arquivo .jpg a ser salvo.'
+    )
+
+    args = parser.parse_args()
+    arg_rg = args.rg
+    arg_name = args.name
 
     conn = conectar_busca()
     ress = conectar_resultado()
 
-    for root,dirs,files in os.walk("in"):
-        for file in files:
-            if file.endswith(".csv"):
-                file_rgs = lista_rgs(file)
+    if arg_rg is None:
+        for root,dirs,files in os.walk("in"):
+            for file in files:
                 
-                for rg, ident in file_rgs:
-                    manda_consulta(rg, conn)
+                if file.endswith(".csv"):
+                    file_rgs = lista_rgs(file)
+                    
+                    for rg, ident in file_rgs:
+                        manda_consulta(rg, conn)
 
-                for rg, ident in file_rgs:
-                    try:
+                    for rg, ident in file_rgs:
+                        
                         foto = pega_resultado(rg, ress)
-                    except TypeError as error:
-                        print("Não encontrado {errorg}, {tipoerro}".format(errorg=rg, tipoerro=error))
-                    if foto is not None:
-                        salva_foto(foto, ident)
-                    else:
-                        print("{} foto não localizada.".format(rg))
+                        
+                        if foto is not None:
+                            salva_foto(foto, ident)
+                        else:
+                            print("{} foto não localizada.".format(rg))
+    
+    else:
+        manda_consulta(arg_rg,conn)
+        foto = pega_resultado(arg_rg, ress)
+        if foto is not None:
+            salva_foto(foto, arg_name)
+        else:
+            print('Foto não localizada.')
