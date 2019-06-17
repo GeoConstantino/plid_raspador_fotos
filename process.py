@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import argparse
 import base64
 import os
@@ -7,20 +8,14 @@ import pandas as pd
 from zeep import Client
 from decouple import config
 
-import ipdb
-
-# configurações de acesso
 CNPJ = config('CNPJ')
 CHAVE = config('CHAVE')
 PERFIL = config('PERFIL')
 CPF = config('CPF')
 
 # local para fotos
-PATH = "retratos"
-
-
-### adicinar feature de passar apenas um rg
-### 
+PATH_OUT = "retratos"
+PATH_IN = "entrada"
 
 def conectar_busca():
     return (Client("http://10.200.96.170:8080/servico.asmx?wsdl"))
@@ -46,35 +41,33 @@ def pega_resultado(rg, ress):
 
 
 def salva_foto(foto, rg):
-    check_out_exist(PATH)
-    with open('{path}/{rg}.jpg'.format(rg=rg, path=PATH), 'wb') as fobj:
+    check_out_exist()
+    with open('{path}/{rg}.jpg'.format(rg=rg, path=PATH_OUT), 'wb') as fobj:
         fobj.write(base64.b64decode(str.encode(foto)))
     
  
 def lista_rgs(file):
-    df = pd.read_csv(file, encoding='latin1')
+ 
+    df = pd.read_csv(PATH_IN+"/"+file, encoding='latin1')
     df = df.loc[:,['VTMA_RG','SNCA_VTMA_DK']]
     df = df.values.tolist()
 
     return df
 
 
-def check_out_exist(path):
-    if not os.path.isdir(path):
-        os.makedirs(PATH)
+def check_out_exist():
+    if not os.path.isdir(PATH_OUT):
+        os.makedirs(PATH_OUT)
         
 
 if __name__=="__main__":
-
     parser = argparse.ArgumentParser()
     parser.add_argument(
         '--rg',
-        help='Para pesquisar por foto de apenas um RG.'
-    )
+        help='Para pesquisar por foto de apenas um RG.')
     parser.add_argument(
         '--name',
-        help='Nome do arquivo ".jpg" a ser salvo.'
-    )
+        help='Nome do arquivo ".jpg" a ser salvo.')
 
     args = parser.parse_args()
     arg_rg = args.rg
@@ -84,10 +77,11 @@ if __name__=="__main__":
     ress = conectar_resultado()
 
     if arg_rg is None:
-        for root,dirs,files in os.walk("in"):
+        for root,dirs,files in os.walk(PATH_IN):
             for file in files:
                 
                 if file.endswith(".csv"):
+                    
                     file_rgs = lista_rgs(file)
                     
                     for rg, ident in file_rgs:
@@ -100,7 +94,7 @@ if __name__=="__main__":
                         if foto is not None:
                             salva_foto(foto, ident)
                         else:
-                            print("{} foto não localizada.".format(rg))
+                            print("{} - não localizado".format(rg))
     
     else:
         manda_consulta(arg_rg,conn)
@@ -108,4 +102,4 @@ if __name__=="__main__":
         if foto is not None:
             salva_foto(foto, arg_name)
         else:
-            print('Foto não localizada.')
+            print('foto não localizada.')

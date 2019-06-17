@@ -8,3 +8,5 @@ test_process.py
 *.pytest_*
 *process.cpython*
 *test_process.cpython*
+*XDG_CACHE_HOME*
+*.zip
