@@ -73,7 +73,7 @@ if __name__=="__main__":
     )
     parser.add_argument(
         '--name',
-        help='Nome do arquivo .jpg a ser salvo.'
+        help='Nome do arquivo ".jpg" a ser salvo.'
     )
 
     args = parser.parse_args()
