@@ -16,7 +16,7 @@ PERFIL = config('PERFIL')
 CPF = config('CPF')
 
 # local para fotos
-PATH = "out"
+PATH = "retratos"
 
 
 ### adicinar feature de passar apenas um rg
@@ -46,6 +46,7 @@ def pega_resultado(rg, ress):
 
 
 def salva_foto(foto, rg):
+    check_out_exist(PATH)
     with open('{path}/{rg}.jpg'.format(rg=rg, path=PATH), 'wb') as fobj:
         fobj.write(base64.b64decode(str.encode(foto)))
     
@@ -57,6 +58,11 @@ def lista_rgs(file):
 
     return df
 
+
+def check_out_exist(path):
+    if not os.path.isdir(path):
+        os.makedirs(PATH)
+        
 
 if __name__=="__main__":
 
