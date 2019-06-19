@@ -47,9 +47,9 @@ def salva_foto(foto, rg):
     
  
 def lista_rgs(file):
- 
     df = pd.read_csv(PATH_IN+"/"+file, encoding='latin1')
     df = df.loc[:,['VTMA_RG','SNCA_VTMA_DK']]
+    df['VTMA_RG'] = df['VTMA_RG'].astype(str)
     df = df.values.tolist()
 
     return df
