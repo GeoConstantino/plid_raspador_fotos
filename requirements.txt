@@ -11,7 +11,7 @@ idna==2.8
 ipython==5.8.0
 ipython-genutils==0.2.0
 isodate==0.6.0
-lxml==4.3.4
+lxml==4.6.5
 pathlib2==2.3.3
 pexpect==4.7.0
 pickleshare==0.7.5
